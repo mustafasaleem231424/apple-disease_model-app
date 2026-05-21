@@ -36,7 +36,7 @@ def create_test_image(width=640, height=480, color=None):
     return buffer
 
 def test_root_endpoint():
-    response = client.get("/")
+    response = client.get("/api/info")
     assert response.status_code == 200
     data = response.json()
     assert data["status"] == "running"

@@ -1,11 +1,12 @@
 """
 Apple Disease Detector - Production FastAPI Application
 """
+import os
 import time
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.config import settings
@@ -15,6 +16,9 @@ from app.api import detect, export, status
 from app.inference.engine import detection_engine
 
 logger = get_logger("main")
+
+FRONTEND_DIST = os.path.join(os.path.dirname(__file__), '..', '..', 'frontend', 'dist')
+HAS_FRONTEND = os.path.isfile(os.path.join(FRONTEND_DIST, 'index.html'))
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -76,15 +80,30 @@ async def global_exception_handler(request, exc):
         }
     )
 
-@app.get("/")
-async def root():
+@app.get("/api/info")
+async def api_info():
     return {
         "name": settings.PROJECT_NAME,
         "version": settings.VERSION,
         "status": "running",
-        "docs": f"{settings.API_PREFIX}/docs"
+        "docs": f"{settings.API_PREFIX}/docs",
+        "frontend": HAS_FRONTEND
     }
 
 @app.get("/ping")
 async def ping():
     return {"status": "ok", "timestamp": time.time()}
+
+if HAS_FRONTEND:
+    logger.info(f"Serving frontend from: {FRONTEND_DIST}")
+    app.mount("/", StaticFiles(directory=FRONTEND_DIST, html=True), name="frontend")
+else:
+    logger.warning("No frontend build found at frontend/dist/")
+    @app.get("/")
+    async def root():
+        return {
+            "name": settings.PROJECT_NAME,
+            "version": settings.VERSION,
+            "status": "running",
+            "docs": f"{settings.API_PREFIX}/docs"
+        }

@@ -196,8 +196,8 @@ run("Readiness and liveness probes", s14)
 
 # 15. Farmer accesses root endpoint
 def s15():
-    return check_endpoint("GET", "/")
-run("Root endpoint returns API info", s15)
+    return check_endpoint("GET", "/api/info")
+run("API info endpoint", s15)
 
 print("\n" + "=" * 70)
 print(f"RESULTS: {passed}/15 PASSED | {failed}/15 FAILED")
