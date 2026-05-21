@@ -14,7 +14,7 @@ function CameraFeed({ onDetection, t, confThreshold }) {
   const { videoRef, active, error, start, stop, captureBlob } = useCamera({ facingMode: 'environment' });
 
   const processFrame = useCallback(async () => {
-    const blob = await captureBlob(0.8);
+    const blob = await captureBlob(0.7);
     if (!blob) return;
     
     frameCountRef.current++;
@@ -69,7 +69,7 @@ function CameraFeed({ onDetection, t, confThreshold }) {
       } catch (err) {
         console.error('Frame processing error:', err);
       }
-    }, 800);
+    }, 1000);
   }, [start, processFrame]);
 
   const stopScanning = useCallback(() => {

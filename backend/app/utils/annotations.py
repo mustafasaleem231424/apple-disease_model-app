@@ -47,6 +47,15 @@ def validate_image(image_np: np.ndarray) -> bool:
         return False
     return True
 
+def optimize_image_for_inference(image_np: np.ndarray, max_dim: int = 1920) -> np.ndarray:
+    import cv2
+    h, w = image_np.shape[:2]
+    if h > max_dim or w > max_dim:
+        scale = max_dim / max(h, w)
+        new_w, new_h = int(w * scale), int(h * scale)
+        return cv2.resize(image_np, (new_w, new_h), interpolation=cv2.INTER_AREA)
+    return image_np
+
 def draw_detections_on_image(image: np.ndarray, detections: List[Detection]) -> np.ndarray:
     import cv2
 

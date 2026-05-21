@@ -10,7 +10,7 @@ from fastapi.responses import JSONResponse
 from app.inference.engine import detection_engine
 from app.config import settings
 from app.logging_config import get_logger
-from app.utils.annotations import encode_image, validate_image, draw_detections_on_image
+from app.utils.annotations import encode_image, validate_image, draw_detections_on_image, optimize_image_for_inference
 from app.schemas import DetectionResponse, StreamFrameResponse
 
 logger = get_logger("api.detect")
@@ -43,6 +43,7 @@ async def detect_image(
     
     try:
         image_np = _load_image(contents)
+        image_np = optimize_image_for_inference(image_np)
         
         if not validate_image(image_np):
             raise HTTPException(status_code=400, detail="Invalid image dimensions")
@@ -91,6 +92,7 @@ async def detect_image_raw(
     
     try:
         image_np = _load_image(contents)
+        image_np = optimize_image_for_inference(image_np)
         
         if not validate_image(image_np):
             raise HTTPException(status_code=400, detail="Invalid image dimensions")
@@ -131,6 +133,7 @@ async def process_stream_frame(
     
     try:
         image = _load_image(contents)
+        image = optimize_image_for_inference(image)
         
         if not validate_image(image):
             raise HTTPException(status_code=400, detail="Invalid frame dimensions")
