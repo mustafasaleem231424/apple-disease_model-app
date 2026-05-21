@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/app/models/weights:/app/app/models/weights:ro
+    environment:
+      - MODEL_TYPE=${MODEL_TYPE:-mock}
+      - MODEL_PATH=${MODEL_PATH:-}
+      - DEVICE=${DEVICE:-cpu}
+      - CONF_THRESHOLD=${CONF_THRESHOLD:-0.25}
+      - IOU_THRESHOLD=${IOU_THRESHOLD:-0.45}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - RATE_LIMIT_PER_MINUTE=${RATE_LIMIT_PER_MINUTE:-60}
+      - MAX_HISTORY=${MAX_HISTORY:-5000}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 512M
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+networks:
+  default:
+    name: apple-disease-detector
+    driver: bridge

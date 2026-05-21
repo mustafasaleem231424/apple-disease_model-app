@@ -1,0 +1,56 @@
+{
+  "app": {
+    "title": "Apple Disease Detector",
+    "subtitle": "Precision Agriculture Diagnostics"
+  },
+  "upload": {
+    "title": "Upload Image",
+    "drag": "Drag & drop an image here",
+    "or": "or",
+    "browse": "Browse Files",
+    "supported": "Supports: JPG, PNG, WEBP (max 16MB)"
+  },
+  "camera": {
+    "title": "Live Camera",
+    "start": "Start Camera",
+    "stop": "Stop Camera",
+    "error": "Camera access denied",
+    "streaming": "Streaming..."
+  },
+  "results": {
+    "title": "Detection Results",
+    "noDetections": "No diseases detected",
+    "detectionsFound": "detection(s) found",
+    "confidence": "Confidence",
+    "export": "Export Results",
+    "exportCSV": "Export as CSV",
+    "exportJSON": "Export as JSON",
+    "clearHistory": "Clear History"
+  },
+  "diseases": {
+    "apple_scab": "Apple Scab",
+    "black_rot": "Black Rot",
+    "cedar_apple_rust": "Cedar Apple Rust",
+    "powdery_mildew": "Powdery Mildew",
+    "healthy_apple": "Healthy Apple",
+    "other": "Other"
+  },
+  "descriptions": {
+    "apple_scab": "Dark olive-green to black velvety spots",
+    "black_rot": "Purple-ringed lesions or frog-eye patterns",
+    "cedar_apple_rust": "Bright orange or yellow spots",
+    "powdery_mildew": "White-to-gray powdery fungal coating",
+    "healthy_apple": "Clean, unblemished foliage",
+    "other": "Background or non-target vegetation"
+  },
+  "status": {
+    "loading": "Loading model...",
+    "ready": "Model Ready",
+    "processing": "Processing...",
+    "error": "Error"
+  },
+  "lang": {
+    "en": "English",
+    "hi": "हिंदी"
+  }
+}
