@@ -1,18 +1,22 @@
 function LanguageSwitch({ lang, onSwitch, t }) {
+  const langs = [
+    { code: 'en', label: t.lang.en },
+    { code: 'hi', label: t.lang.hi },
+    { code: 'ur', label: t.lang.ur }
+  ];
+
   return (
     <div className="lang-switch">
-      <button
-        className={`lang-btn ${lang === 'en' ? 'active' : ''}`}
-        onClick={() => onSwitch('en')}
-      >
-        {t.lang.en}
-      </button>
-      <button
-        className={`lang-btn ${lang === 'hi' ? 'active' : ''}`}
-        onClick={() => onSwitch('hi')}
-      >
-        {t.lang.hi}
-      </button>
+      {langs.map(l => (
+        <button
+          key={l.code}
+          className={`lang-btn ${lang === l.code ? 'active' : ''}`}
+          onClick={() => onSwitch(l.code)}
+          aria-pressed={lang === l.code}
+        >
+          {l.label}
+        </button>
+      ))}
     </div>
   );
 }

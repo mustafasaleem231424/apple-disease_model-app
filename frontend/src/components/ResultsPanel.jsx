@@ -1,7 +1,7 @@
 import { exportCSV, exportJSON } from '../services/api';
 import { getDiseaseClass, formatConfidence } from '../utils/helpers';
 
-function ResultsPanel({ detections, annotatedImage, t, onClear, processing, error, confThreshold, onConfChange, inferenceTime, imageSize }) {
+function ResultsPanel({ detections, annotatedImage, t, onClear, processing, error, confThreshold, onConfChange, inferenceTime, imageSize, audioEnabled, onAudioToggle }) {
   const hasDetections = detections && detections.length > 0;
 
   const getDiseaseLabel = (className) => {
@@ -22,18 +22,28 @@ function ResultsPanel({ detections, annotatedImage, t, onClear, processing, erro
     <div className="card results-panel">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <h2 style={{ margin: 0, padding: 0, border: 'none' }}>{t.results.title}</h2>
-        {hasDetections && (
-          <span style={{
-            background: 'var(--green-medium)',
-            color: 'white',
-            padding: '4px 12px',
-            borderRadius: 'var(--radius-xl)',
-            fontSize: 14,
-            fontWeight: 600
-          }}>
-            {detections.length}
-          </span>
-        )}
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <button
+            onClick={onAudioToggle}
+            className="icon-btn"
+            title={audioEnabled ? 'Mute' : 'Unmute'}
+            aria-label={audioEnabled ? 'Disable audio announcements' : 'Enable audio announcements'}
+          >
+            {audioEnabled ? '🔊' : '🔇'}
+          </button>
+          {hasDetections && (
+            <span style={{
+              background: 'var(--green-medium)',
+              color: 'white',
+              padding: '4px 12px',
+              borderRadius: 'var(--radius-xl)',
+              fontSize: 14,
+              fontWeight: 600
+            }}>
+              {detections.length}
+            </span>
+          )}
+        </div>
       </div>
 
       {processing && (
@@ -56,7 +66,7 @@ function ResultsPanel({ detections, annotatedImage, t, onClear, processing, erro
               Image: {imageSize.width}x{imageSize.height} | {inferenceTime}ms
             </p>
           )}
-          
+
           <div style={{ marginBottom: 12, padding: '8px 12px', background: 'var(--green-pale)', borderRadius: 'var(--radius)', fontSize: 13 }}>
             <strong>Summary:</strong> {Object.entries(diseaseCounts).map(([cls, count]) => (
               <span key={cls} style={{ marginLeft: 8 }}>

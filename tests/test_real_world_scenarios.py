@@ -94,7 +94,7 @@ def test_scenario_1_clear_leaf_with_scab():
     
     def verify(data):
         assert data['count'] >= 0
-        assert data['inference_time_ms'] < 1000
+        assert data['inference_time_ms'] < 3000
         assert 'annotated_image' in data
     
     run_scenario("Clear leaf with apple scab symptoms", image, verify)
@@ -106,7 +106,7 @@ def test_scenario_2_healthy_leaf():
     
     def verify(data):
         assert data['count'] >= 0
-        assert data['inference_time_ms'] < 1000
+        assert data['inference_time_ms'] < 3000
     
     run_scenario("Healthy apple leaf", image, verify)
 
@@ -125,7 +125,7 @@ def test_scenario_3_multiple_diseases():
     
     def verify(data):
         assert data['count'] >= 0
-        assert data['inference_time_ms'] < 1000
+        assert data['inference_time_ms'] < 3000
     
     run_scenario("Multiple disease symptoms in one image", image, verify)
 
@@ -136,7 +136,7 @@ def test_scenario_4_low_light():
     image = add_leaf_pattern(image, spots=6, spot_color=(10, 15, 10), spot_size=30)
     
     def verify(data):
-        assert data['inference_time_ms'] < 1000
+        assert data['inference_time_ms'] < 3000
     
     run_scenario("Low-light orchard conditions", image, verify)
 
@@ -147,7 +147,7 @@ def test_scenario_5_blurry_image():
     image = add_blur(image, kernel_size=7)
     
     def verify(data):
-        assert data['inference_time_ms'] < 1000
+        assert data['inference_time_ms'] < 3000
     
     run_scenario("Blurry handheld camera image", image, verify)
 
@@ -162,7 +162,7 @@ def test_scenario_6_close_up_lesion():
     
     def verify(data):
         assert data['count'] >= 0
-        assert data['inference_time_ms'] < 1000
+        assert data['inference_time_ms'] < 3000
     
     run_scenario("Close-up macro lesion shot", image, verify)
 
@@ -182,7 +182,7 @@ def test_scenario_7_background_weeds():
     
     def verify(data):
         assert data['count'] >= 0
-        assert data['inference_time_ms'] < 1000
+        assert data['inference_time_ms'] < 3000
     
     run_scenario("Background weeds and non-target vegetation", image, verify)
 

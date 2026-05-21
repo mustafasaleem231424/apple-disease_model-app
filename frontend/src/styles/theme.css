@@ -51,7 +51,7 @@ body {
   min-height: 100vh;
   min-height: 100dvh;
   color: var(--gray-800);
-  line-height: 1.5;
+  line-height: 1.6;
   overscroll-behavior: none;
   padding-top: var(--safe-top);
   padding-bottom: var(--safe-bottom);
@@ -93,7 +93,7 @@ body {
 .lang-switch { display: flex; gap: 6px; }
 
 .lang-btn {
-  padding: 8px 14px;
+  padding: 10px 16px;
   border: 2px solid rgba(255, 255, 255, 0.3);
   background: transparent;
   color: var(--white);
@@ -103,6 +103,7 @@ body {
   font-size: 0.875rem;
   transition: all 0.15s ease;
   touch-action: manipulation;
+  min-height: 44px;
 }
 
 .lang-btn:hover, .lang-btn.active { background: var(--white); color: var(--green-dark); }
@@ -118,11 +119,12 @@ body {
   margin-bottom: 16px;
   box-shadow: var(--shadow-sm);
   border: 1px solid var(--gray-200);
+  flex-wrap: wrap;
 }
 
 .status-dot {
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   background: var(--green-light);
   flex-shrink: 0;
@@ -132,6 +134,77 @@ body {
 .status-dot.error { background: var(--red); }
 
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+.help-bar {
+  margin-bottom: 12px;
+}
+
+.help-toggle {
+  background: var(--white);
+  border: 2px solid var(--green-medium);
+  color: var(--green-primary);
+  padding: 10px 20px;
+  border-radius: var(--radius-xl);
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.9rem;
+  transition: all 0.15s ease;
+  touch-action: manipulation;
+  min-height: 44px;
+}
+
+.help-toggle:hover { background: var(--green-pale); }
+.help-toggle:active { transform: scale(0.97); }
+
+.help-steps {
+  background: var(--white);
+  border: 2px solid var(--green-pale);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+}
+
+.help-title {
+  font-weight: 700;
+  color: var(--green-primary);
+  font-size: 1.05rem;
+  margin-bottom: 14px;
+}
+
+.help-step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--gray-200);
+  font-size: 0.95rem;
+}
+
+.help-step:last-child { border-bottom: none; }
+
+.help-step-num {
+  background: var(--green-medium);
+  color: white;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.help-tip {
+  margin-top: 14px;
+  padding: 12px;
+  background: var(--yellow-light);
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+  color: var(--gray-700);
+}
 
 .main-grid {
   display: grid;
@@ -176,24 +249,43 @@ body {
 .upload-zone:hover, .upload-zone.drag-over { border-color: var(--green-primary); background: #d4edda; }
 .upload-zone:active { transform: scale(0.99); }
 
-.upload-zone p { color: var(--gray-600); margin: 8px 0; font-size: 0.875rem; }
+.upload-zone p { color: var(--gray-600); margin: 8px 0; font-size: 0.9rem; }
 
 .upload-btn {
   background: var(--green-medium);
   color: var(--white);
   border: none;
-  padding: 12px 24px;
+  padding: 14px 28px;
   border-radius: var(--radius);
   cursor: pointer;
-  font-weight: 600;
-  font-size: 0.875rem;
+  font-weight: 700;
+  font-size: 0.95rem;
   margin-top: 12px;
   transition: all 0.15s ease;
   touch-action: manipulation;
+  min-height: 48px;
 }
 
 .upload-btn:hover { background: var(--green-primary); }
 .upload-btn:active { transform: scale(0.98); }
+
+.icon-btn {
+  background: transparent;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius);
+  cursor: pointer;
+  padding: 8px 10px;
+  font-size: 1.1rem;
+  transition: all 0.15s ease;
+  touch-action: manipulation;
+  min-height: 40px;
+  min-width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-btn:hover { background: var(--gray-100); }
 
 .camera-container {
   position: relative;
@@ -226,14 +318,15 @@ body {
 
 .camera-btn {
   flex: 1;
-  padding: 14px;
+  padding: 16px;
   border: none;
   border-radius: var(--radius);
   cursor: pointer;
-  font-weight: 600;
-  font-size: 0.875rem;
+  font-weight: 700;
+  font-size: 0.95rem;
   transition: all 0.15s ease;
   touch-action: manipulation;
+  min-height: 52px;
 }
 
 .camera-btn.start { background: var(--green-medium); color: var(--white); }
@@ -249,11 +342,11 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 14px;
+  padding: 14px 16px;
   margin: 8px 0;
   background: var(--gray-50);
   border-radius: var(--radius);
-  border-left: 4px solid var(--green-medium);
+  border-left: 5px solid var(--green-medium);
   transition: background 0.15s ease;
 }
 
@@ -262,22 +355,22 @@ body {
 .detection-item.disease { border-left-color: var(--orange); }
 
 .detection-info { flex: 1; min-width: 0; }
-.detection-name { font-weight: 600; color: var(--gray-800); font-size: 0.875rem; }
-.detection-desc { font-size: 0.75rem; color: var(--gray-500); margin-top: 2px; }
+.detection-name { font-weight: 700; color: var(--gray-800); font-size: 0.95rem; }
+.detection-desc { font-size: 0.8rem; color: var(--gray-500); margin-top: 2px; }
 
 .detection-confidence {
   font-weight: 700;
   color: var(--green-medium);
-  font-size: 0.875rem;
+  font-size: 0.95rem;
   margin-left: 12px;
   flex-shrink: 0;
 }
 
 .confidence-bar {
   width: 100%;
-  height: 6px;
+  height: 8px;
   background: var(--gray-200);
-  border-radius: 3px;
+  border-radius: 4px;
   margin-top: 8px;
   overflow: hidden;
 }
@@ -285,7 +378,7 @@ body {
 .confidence-fill {
   height: 100%;
   background: linear-gradient(90deg, var(--green-light), var(--green-medium));
-  border-radius: 3px;
+  border-radius: 4px;
   transition: width 0.3s ease;
 }
 
@@ -294,16 +387,17 @@ body {
 .export-btn {
   flex: 1;
   min-width: 100px;
-  padding: 12px;
-  border: 1px solid var(--green-medium);
+  padding: 14px;
+  border: 2px solid var(--green-medium);
   background: var(--white);
   color: var(--green-medium);
   border-radius: var(--radius);
   cursor: pointer;
-  font-weight: 600;
-  font-size: 0.8125rem;
+  font-weight: 700;
+  font-size: 0.9rem;
   transition: all 0.15s ease;
   touch-action: manipulation;
+  min-height: 48px;
 }
 
 .export-btn:hover { background: var(--green-medium); color: var(--white); }
@@ -323,9 +417,9 @@ body {
   transform: translateX(-50%) translateY(100px);
   background: var(--gray-900);
   color: var(--white);
-  padding: 12px 20px;
+  padding: 14px 24px;
   border-radius: var(--radius-xl);
-  font-size: 0.875rem;
+  font-size: 0.95rem;
   font-weight: 500;
   box-shadow: var(--shadow-lg);
   z-index: 1000;
@@ -370,4 +464,5 @@ body {
   .upload-zone { padding: 24px 12px; }
   .export-buttons { flex-direction: column; }
   .export-btn { min-width: auto; }
+  .help-step { font-size: 0.9rem; }
 }

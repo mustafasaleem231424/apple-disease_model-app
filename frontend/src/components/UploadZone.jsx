@@ -1,9 +1,10 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { validateFile } from '../utils/helpers';
+import { validateFile, compressImage } from '../utils/helpers';
 
 function UploadZone({ onDetection, t, maxSizeMB = 16, onImageSelect }) {
   const [dragOver, setDragOver] = useState(false);
   const [preview, setPreview] = useState(null);
+  const [compressing, setCompressing] = useState(false);
   const fileInputRef = useRef(null);
 
   const handleFile = useCallback(async (file) => {
@@ -12,15 +13,27 @@ function UploadZone({ onDetection, t, maxSizeMB = 16, onImageSelect }) {
       console.error(error);
       return;
     }
-    
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      setPreview(e.target.result);
-      if (onImageSelect) onImageSelect(e.target.result);
-    };
-    reader.readAsDataURL(file);
-    
-    onDetection(file);
+
+    setCompressing(true);
+    try {
+      const compressed = await compressImage(file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setPreview(e.target.result);
+        if (onImageSelect) onImageSelect(e.target.result);
+      };
+      reader.readAsDataURL(compressed);
+      onDetection(compressed);
+    } catch (err) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setPreview(e.target.result);
+        if (onImageSelect) onImageSelect(e.target.result);
+      };
+      reader.readAsDataURL(file);
+      onDetection(file);
+    }
+    setCompressing(false);
   }, [onDetection, maxSizeMB, onImageSelect]);
 
   const handleDrop = useCallback((e) => {
@@ -52,11 +65,11 @@ function UploadZone({ onDetection, t, maxSizeMB = 16, onImageSelect }) {
   return (
     <div className="card">
       <h2>{t.upload.title}</h2>
-      
+
       {preview && (
         <div className="preview-container" style={{ marginBottom: 16 }}>
           <img src={preview} alt="Preview" style={{ maxHeight: 200, objectFit: 'contain' }} />
-          <button 
+          <button
             onClick={(e) => { e.stopPropagation(); setPreview(null); if (onImageSelect) onImageSelect(null); }}
             style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(0,0,0,0.6)', color: 'white', border: 'none', borderRadius: '50%', width: 28, height: 28, cursor: 'pointer', fontSize: 16 }}
           >
@@ -64,7 +77,7 @@ function UploadZone({ onDetection, t, maxSizeMB = 16, onImageSelect }) {
           </button>
         </div>
       )}
-      
+
       <div
         className={`upload-zone ${dragOver ? 'drag-over' : ''}`}
         onDrop={handleDrop}
@@ -75,17 +88,26 @@ function UploadZone({ onDetection, t, maxSizeMB = 16, onImageSelect }) {
         tabIndex={0}
         aria-label={t.upload.title}
       >
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ margin: '0 auto 12px', opacity: 0.6 }}>
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-          <polyline points="17 8 12 3 7 8" />
-          <line x1="12" y1="3" x2="12" y2="15" />
-        </svg>
-        <p>{t.upload.drag}</p>
-        <p>{t.upload.or}</p>
-        <button className="upload-btn" onClick={(e) => { e.stopPropagation(); handleClick(); }}>
-          {t.upload.browse}
-        </button>
-        <p style={{ fontSize: 12, marginTop: 12, opacity: 0.7 }}>{t.upload.supported}</p>
+        {compressing ? (
+          <>
+            <div className="spinner" style={{ margin: '0 auto 12px' }} />
+            <p>{t.status.processing}</p>
+          </>
+        ) : (
+          <>
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ margin: '0 auto 12px', opacity: 0.6 }}>
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="17 8 12 3 7 8" />
+              <line x1="12" y1="3" x2="12" y2="15" />
+            </svg>
+            <p>{t.upload.drag}</p>
+            <p>{t.upload.or}</p>
+            <button className="upload-btn" onClick={(e) => { e.stopPropagation(); handleClick(); }}>
+              {t.upload.browse}
+            </button>
+            <p style={{ fontSize: 12, marginTop: 12, opacity: 0.7 }}>{t.upload.supported}</p>
+          </>
+        )}
       </div>
       <input
         ref={fileInputRef}

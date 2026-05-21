@@ -230,8 +230,11 @@ with TestClient(app) as client:
         img = create_image(5000, 5000, noise=5)
         f = image_to_file(img)
         resp = client.post("/api/v1/detect/image", files={"file": ("large.jpg", f, "image/jpeg")})
-        assert resp.status_code in [400, 500]
-    t("26. 5000x5000 image returns 400/500", test_26)
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["image_width"] <= 1920
+        assert data["image_height"] <= 1920
+    t("26. 5000x5000 image auto-resized to <=1920px", test_26)
 
     def test_27():
         resp = client.post("/api/v1/detect/image", files={"file": ("bad.jpg", io.BytesIO(b"\xff\xd8\xff\xe0corrupted"), "image/jpeg")})

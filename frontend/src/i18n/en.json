@@ -1,7 +1,16 @@
 {
   "app": {
     "title": "Apple Disease Detector",
-    "subtitle": "Precision Agriculture Diagnostics"
+    "subtitle": "Precision Agriculture Diagnostics",
+    "help": "How to use",
+    "closeHelp": "Close",
+    "howToUse": "How to use this app:",
+    "step1": "Take a photo of an apple leaf or fruit",
+    "step2": "Upload the image or use the camera",
+    "step3": "AI will analyze and detect diseases",
+    "step4": "Review results and get treatment advice",
+    "tip": "Tip",
+    "helpTip": "Point your camera at an apple tree leaf for best results. Use in daylight."
   },
   "upload": {
     "title": "Upload Image",
@@ -51,6 +60,7 @@
   },
   "lang": {
     "en": "English",
-    "hi": "हिंदी"
+    "hi": "हिंदी",
+    "ur": "اردو"
   }
 }
