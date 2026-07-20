@@ -124,10 +124,17 @@ class ONNXModel(DetectionModel):
             x2 = ((cx + bw / 2) - pad_x) / scale
             y2 = ((cy + bh / 2) - pad_y) / scale
             
-            x1 = max(0, min(x1, w_orig))
-            y1 = max(0, min(y1, h_orig))
-            x2 = max(0, min(x2, w_orig))
-            y2 = max(0, min(y2, h_orig))
+            x1 = max(0.0, min(x1, float(w_orig)))
+            y1 = max(0.0, min(y1, float(h_orig)))
+            x2 = max(0.0, min(x2, float(w_orig)))
+            y2 = max(0.0, min(y2, float(h_orig)))
+            
+            box_w = x2 - x1
+            box_h = y2 - y1
+            
+            # Focus filtering: Ignore tiny background artifacts (< 0.2% of image area)
+            if (box_w * box_h) < (w_orig * h_orig * 0.002) and confidence < 0.40:
+                continue
             
             detections.append(Detection(
                 class_id=int(class_id),

@@ -61,16 +61,40 @@ def draw_detections_on_image(image: np.ndarray, detections: List[Detection]) -> 
 
     for det in detections:
         x1, y1, x2, y2 = [int(v) for v in det.bbox]
+        w = x2 - x1
+        h = y2 - y1
 
+        # 1. Main bounding rectangle
         cv2.rectangle(image, (x1, y1), (x2, y2), BOX_COLOR, BOX_THICKNESS)
 
-        label = f"{det.class_name.replace('_', ' ')}: {det.confidence:.2f}"
+        # 2. Corner brackets for precision focus lock
+        corner_len = max(8, min(20, int(min(w, h) * 0.2)))
+        corner_thick = BOX_THICKNESS + 1
+        
+        # Top-Left
+        cv2.line(image, (x1, y1), (x1 + corner_len, y1), BOX_COLOR, corner_thick)
+        cv2.line(image, (x1, y1), (x1, y1 + corner_len), BOX_COLOR, corner_thick)
+        
+        # Top-Right
+        cv2.line(image, (x2 - corner_len, y1), (x2, y1), BOX_COLOR, corner_thick)
+        cv2.line(image, (x2, y1), (x2, y1 + corner_len), BOX_COLOR, corner_thick)
+
+        # Bottom-Left
+        cv2.line(image, (x1, y2 - corner_len), (x1, y2), BOX_COLOR, corner_thick)
+        cv2.line(image, (x1, y2), (x1 + corner_len, y2), BOX_COLOR, corner_thick)
+
+        # Bottom-Right
+        cv2.line(image, (x2 - corner_len, y2), (x2, y2), BOX_COLOR, corner_thick)
+        cv2.line(image, (x2, y2 - corner_len), (x2, y2), BOX_COLOR, corner_thick)
+
+        # 3. Label tag
+        label = f"{det.class_name.replace('_', ' ').upper()}: {int(det.confidence * 100)}%"
         (tw, th), baseline = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, LABEL_FONT_SCALE, LABEL_FONT_THICKNESS)
         
-        label_y1 = max(y1, th + 4)
-        label_y2 = label_y1 - th - 4
+        label_y1 = max(y1, th + 6)
+        label_y2 = label_y1 - th - 6
         
-        cv2.rectangle(image, (x1, label_y2), (x1 + tw + 6, label_y1 + 2), LABEL_BG_COLOR, -1)
-        cv2.putText(image, label, (x1 + 3, label_y1 - 2), cv2.FONT_HERSHEY_SIMPLEX, LABEL_FONT_SCALE, LABEL_TEXT_COLOR, LABEL_FONT_THICKNESS)
+        cv2.rectangle(image, (x1, label_y2), (x1 + tw + 8, label_y1), LABEL_BG_COLOR, -1)
+        cv2.putText(image, label, (x1 + 4, label_y1 - 3), cv2.FONT_HERSHEY_SIMPLEX, LABEL_FONT_SCALE, LABEL_TEXT_COLOR, LABEL_FONT_THICKNESS, cv2.LINE_AA)
 
     return image
