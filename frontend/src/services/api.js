@@ -5,7 +5,11 @@ const API_URL = import.meta.env.VITE_API_URL || '';
 const api = axios.create({
   baseURL: API_URL,
   timeout: 60000,
-  headers: { 'Accept': 'application/json' }
+  headers: {
+    'Accept': 'application/json',
+    'Bypass-Tunnel-Reminder': 'true',
+    'ngrok-skip-browser-warning': 'true'
+  }
 });
 
 api.interceptors.response.use(
