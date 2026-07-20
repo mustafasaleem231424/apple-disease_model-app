@@ -1,10 +1,9 @@
-import { useState, useRef, useCallback, useEffect } from 'react';
-import { validateFile, compressImage } from '../utils/helpers';
+import { useState, useRef, useCallback } from 'react';
+import { validateFile } from '../utils/helpers';
 
 function UploadZone({ onDetection, t, maxSizeMB = 16, onImageSelect }) {
   const [dragOver, setDragOver] = useState(false);
   const [preview, setPreview] = useState(null);
-  const [compressing, setCompressing] = useState(false);
   const fileInputRef = useRef(null);
 
   const handleFile = useCallback(async (file) => {
@@ -13,34 +12,22 @@ function UploadZone({ onDetection, t, maxSizeMB = 16, onImageSelect }) {
       console.error(error);
       return;
     }
-
-    setCompressing(true);
-    try {
-      const compressed = await compressImage(file);
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setPreview(e.target.result);
-        if (onImageSelect) onImageSelect(e.target.result);
-      };
-      reader.readAsDataURL(compressed);
-      onDetection(compressed);
-    } catch (err) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setPreview(e.target.result);
-        if (onImageSelect) onImageSelect(e.target.result);
-      };
-      reader.readAsDataURL(file);
-      onDetection(file);
-    }
-    setCompressing(false);
+    
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setPreview(e.target.result);
+      if (onImageSelect) onImageSelect(e.target.result);
+    };
+    reader.readAsDataURL(file);
+    
+    onDetection(file);
   }, [onDetection, maxSizeMB, onImageSelect]);
 
   const handleDrop = useCallback((e) => {
     e.preventDefault();
     setDragOver(false);
     const file = e.dataTransfer.files[0];
-    handleFile(file);
+    if (file) handleFile(file);
   }, [handleFile]);
 
   const handleDragOver = useCallback((e) => {
@@ -54,7 +41,7 @@ function UploadZone({ onDetection, t, maxSizeMB = 16, onImageSelect }) {
 
   const handleInputChange = useCallback((e) => {
     const file = e.target.files[0];
-    handleFile(file);
+    if (file) handleFile(file);
     e.target.value = '';
   }, [handleFile]);
 
@@ -65,19 +52,43 @@ function UploadZone({ onDetection, t, maxSizeMB = 16, onImageSelect }) {
   return (
     <div className="card">
       <h2>{t.upload.title}</h2>
-
+      
       {preview && (
-        <div className="preview-container" style={{ marginBottom: 16 }}>
-          <img src={preview} alt="Preview" style={{ maxHeight: 200, objectFit: 'contain' }} />
-          <button
-            onClick={(e) => { e.stopPropagation(); setPreview(null); if (onImageSelect) onImageSelect(null); }}
-            style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(0,0,0,0.6)', color: 'white', border: 'none', borderRadius: '50%', width: 28, height: 28, cursor: 'pointer', fontSize: 16 }}
+        <div className="preview-container" style={{ marginTop: 12, marginBottom: 16 }}>
+          <div className="preview-tag font-outfit">IMAGE UPLOADED</div>
+          <img src={preview} alt="Uploaded Leaf Preview" style={{ width: '100%', maxHeight: 260, objectFit: 'cover' }} />
+          <button 
+            onClick={(e) => { 
+              e.stopPropagation(); 
+              setPreview(null); 
+              if (onImageSelect) onImageSelect(null); 
+            }}
+            style={{ 
+              position: 'absolute', 
+              top: 12, 
+              right: 12, 
+              background: 'rgba(0,0,0,0.7)', 
+              color: 'var(--red)', 
+              border: '1px solid rgba(239, 68, 68, 0.3)', 
+              borderRadius: '50%', 
+              width: 32, 
+              height: 32, 
+              cursor: 'pointer', 
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontWeight: 800,
+              fontSize: 16,
+              transition: 'all 0.2s ease',
+              zIndex: 3
+            }}
+            title="Clear Image"
           >
-            x
+            ×
           </button>
         </div>
       )}
-
+      
       <div
         className={`upload-zone ${dragOver ? 'drag-over' : ''}`}
         onDrop={handleDrop}
@@ -88,26 +99,17 @@ function UploadZone({ onDetection, t, maxSizeMB = 16, onImageSelect }) {
         tabIndex={0}
         aria-label={t.upload.title}
       >
-        {compressing ? (
-          <>
-            <div className="spinner" style={{ margin: '0 auto 12px' }} />
-            <p>{t.status.processing}</p>
-          </>
-        ) : (
-          <>
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ margin: '0 auto 12px', opacity: 0.6 }}>
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="17 8 12 3 7 8" />
-              <line x1="12" y1="3" x2="12" y2="15" />
-            </svg>
-            <p>{t.upload.drag}</p>
-            <p>{t.upload.or}</p>
-            <button className="upload-btn" onClick={(e) => { e.stopPropagation(); handleClick(); }}>
-              {t.upload.browse}
-            </button>
-            <p style={{ fontSize: 12, marginTop: 12, opacity: 0.7 }}>{t.upload.supported}</p>
-          </>
-        )}
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ opacity: 0.85 }}>
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+          <polyline points="17 8 12 3 7 8" />
+          <line x1="12" y1="3" x2="12" y2="15" />
+        </svg>
+        <p style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{t.upload.drag}</p>
+        <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t.upload.or}</p>
+        <button className="upload-btn" onClick={(e) => { e.stopPropagation(); handleClick(); }}>
+          {t.upload.browse}
+        </button>
+        <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t.upload.supported}</p>
       </div>
       <input
         ref={fileInputRef}

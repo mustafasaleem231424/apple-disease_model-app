@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import UploadZone from './components/UploadZone';
 import CameraFeed from './components/CameraFeed';
 import ResultsPanel from './components/ResultsPanel';
@@ -6,13 +6,11 @@ import LanguageSwitch from './components/LanguageSwitch';
 import InstallPrompt from './components/InstallPrompt';
 import { useDetection } from './hooks/useDetection';
 import { getHealth, getModelInfo } from './services/api';
-import { speakText, getLocation } from './utils/helpers';
 import en from './i18n/en.json';
 import hi from './i18n/hi.json';
-import ur from './i18n/ur.json';
 import './styles/theme.css';
 
-const translations = { en, hi, ur };
+const translations = { en, hi };
 
 function App() {
   const [lang, setLang] = useState('en');
@@ -21,12 +19,10 @@ function App() {
   const [confThreshold, setConfThreshold] = useState(0.25);
   const [imageSize, setImageSize] = useState(null);
   const [inferenceTime, setInferenceTime] = useState(null);
-  const [location, setLocation] = useState(null);
-  const [audioEnabled, setAudioEnabled] = useState(true);
-  const [showHelp, setShowHelp] = useState(false);
-  const prevDetectionsRef = useRef([]);
+  const [activeTab, setActiveTab] = useState('live'); // 'live' is default, highlighting real-time check
+  
   const t = translations[lang];
-
+  
   const {
     detections,
     annotatedImage,
@@ -37,10 +33,6 @@ function App() {
     clearHistory,
     reset
   } = useDetection();
-
-  useEffect(() => {
-    getLocation().then(setLocation);
-  }, []);
 
   useEffect(() => {
     const checkHealth = async () => {
@@ -63,23 +55,6 @@ function App() {
     const interval = setInterval(checkHealth, 15000);
     return () => clearInterval(interval);
   }, []);
-
-  useEffect(() => {
-    if (!audioEnabled || !detections || detections.length === 0) return;
-    const prev = prevDetectionsRef.current;
-    const newDiseases = detections.filter(d =>
-      !prev.some(p => p.class_name === d.class_name)
-    );
-    if (newDiseases.length > 0) {
-      const diseaseNames = newDiseases.map(d => {
-        const label = t.diseases[d.class_name] || d.class_name;
-        return `${label} ${(d.confidence * 100).toFixed(0)}%`;
-      }).join(', ');
-      const greeting = t.app.title;
-      speakText(`${greeting}. Detected: ${diseaseNames}`, lang);
-    }
-    prevDetectionsRef.current = detections;
-  }, [detections, audioEnabled, lang, t]);
 
   const handleDetection = useCallback(async (file, conf) => {
     reset();
@@ -111,72 +86,88 @@ function App() {
     setInferenceTime(null);
   }, [clearHistory, reset]);
 
-  const steps = [
-    t.app.step1 || '📸 Take a photo of an apple leaf or fruit',
-    t.app.step2 || '⬆️ Upload the image using the button above',
-    t.app.step3 || '🤖 AI will analyze and detect diseases',
-    t.app.step4 || '📋 Review results and get treatment advice'
-  ];
-
   return (
     <div className="app-container">
-      <header className="header">
-        <div>
-          <h1>{t.app.title}</h1>
-          <p>{t.app.subtitle}</p>
-          {modelInfo && (
-            <p style={{ fontSize: 12, opacity: 0.7, marginTop: 4 }}>
-              {modelInfo.type.toUpperCase()} | {modelInfo.num_classes} classes | {modelInfo.input_size}px
-            </p>
-          )}
+      {/* Premium Hero Banner Section */}
+      <section className="hero-banner animate-fade-in">
+        <div className="hero-background-wrapper">
+          <img src="/dashboard_banner.png" alt="Agricultural Diagnostics Banner" className="hero-bg" />
+          <div className="hero-gradient-overlay" />
         </div>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+        <div className="hero-content">
+          <div className="hero-meta">
+            <h1>{t.app.title}</h1>
+            <p className="hero-subtitle">{t.app.subtitle}</p>
+            {modelInfo && (
+              <div className="model-badge-container">
+                <span className="model-badge font-outfit">
+                  {modelInfo.type.toUpperCase()} MODEL ACTIVE
+                </span>
+                <span className="model-badge-detail">
+                  {modelInfo.num_classes} Classes | {modelInfo.input_size}px Resolution
+                </span>
+              </div>
+            )}
+          </div>
           <LanguageSwitch lang={lang} onSwitch={setLang} t={t} />
         </div>
-      </header>
+      </section>
 
-      <div className="status-bar">
-        <div className={`status-dot ${modelReady ? '' : 'loading'}`} />
-        <span>{modelReady ? t.status.ready : t.status.loading}</span>
-        {location && (
-          <span style={{ marginLeft: 'auto', fontSize: 11, color: 'var(--gray-500)' }}>
-            📍 {location.lat}, {location.lng}
-          </span>
-        )}
-        {processing && <span style={{ marginLeft: processing ? 0 : 'auto', fontSize: 14 }}>{t.status.processing}</span>}
-      </div>
-
-      <div className="help-bar">
-        <button className="help-toggle" onClick={() => setShowHelp(!showHelp)}>
-          {showHelp ? '✕' : '?'} {showHelp ? (t.app.closeHelp || 'Close') : (t.app.help || 'How to use')}
+      {/* Control Tabs - Psychologically prioritizing Real-Time checker */}
+      <div className="tab-navigation-container">
+        <button 
+          className={`tab-btn font-outfit ${activeTab === 'live' ? 'active' : ''}`}
+          onClick={() => { setActiveTab('live'); reset(); }}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ marginRight: 8 }}>
+            <path d="M23 7l-7 5 7 5V7z" />
+            <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+          </svg>
+          REAL-TIME SCANNERS
+        </button>
+        <button 
+          className={`tab-btn font-outfit ${activeTab === 'upload' ? 'active' : ''}`}
+          onClick={() => { setActiveTab('upload'); reset(); }}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ marginRight: 8 }}>
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+            <circle cx="8.5" cy="8.5" r="1.5" />
+            <polyline points="21 15 16 10 5 21" />
+          </svg>
+          STATIC PHOTO ANALYZERS
         </button>
       </div>
 
-      {showHelp && (
-        <div className="help-steps">
-          <div className="help-title">{t.app.howToUse || 'How to use this app:'}</div>
-          {steps.map((step, i) => (
-            <div key={i} className="help-step">
-              <span className="help-step-num">{i + 1}</span>
-              <span>{step}</span>
+      {/* Global Status Banner */}
+      <div className="status-container">
+        <div className="status-bar">
+          <div className={`status-dot ${modelReady ? '' : 'loading'}`} />
+          <span>{modelReady ? t.status.ready.toUpperCase() : t.status.loading.toUpperCase()}</span>
+          {processing && (
+            <div className="status-processing-pill">
+              <div className="spinner-mini" />
+              <span>{t.status.processing.toUpperCase()}</span>
             </div>
-          ))}
-          <div className="help-tip">
-            💡 <strong>{t.app.tip || 'Tip:'}</strong> {t.app.helpTip || 'Point your camera at an apple tree leaf for best results. Use in daylight.'}
-          </div>
+          )}
         </div>
-      )}
+      </div>
 
-      <div className="main-grid">
-        <div>
-          <UploadZone onDetection={handleDetection} t={t} />
-          <div style={{ marginTop: 20 }}>
-            <CameraFeed
-              onDetection={handleFrameDetection}
-              t={t}
-              confThreshold={confThreshold}
-            />
-          </div>
+      {/* Primary Dashboard Grid */}
+      <main className="main-grid">
+        <div className="actions-column">
+          {activeTab === 'live' ? (
+            <div className="animate-fade-in">
+              <CameraFeed 
+                onDetection={handleFrameDetection} 
+                t={t} 
+                confThreshold={confThreshold}
+              />
+            </div>
+          ) : (
+            <div className="animate-fade-in">
+              <UploadZone onDetection={handleDetection} t={t} />
+            </div>
+          )}
         </div>
         <ResultsPanel
           detections={detections}
@@ -189,10 +180,8 @@ function App() {
           onConfChange={setConfThreshold}
           inferenceTime={inferenceTime}
           imageSize={imageSize}
-          audioEnabled={audioEnabled}
-          onAudioToggle={() => setAudioEnabled(!audioEnabled)}
         />
-      </div>
+      </main>
 
       <InstallPrompt />
     </div>

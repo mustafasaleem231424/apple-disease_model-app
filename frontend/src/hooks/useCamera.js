@@ -5,10 +5,25 @@ export function useCamera(options = {}) {
   const [active, setActive] = useState(false);
   const [error, setError] = useState(null);
   const [permission, setPermission] = useState('prompt');
+  const [devices, setDevices] = useState([]);
   const videoRef = useRef(null);
   const streamRef = useRef(null);
 
-  const start = useCallback(async () => {
+  // Get list of available camera sources
+  const refreshDevices = useCallback(async () => {
+    try {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+        return;
+      }
+      const allDevices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = allDevices.filter(d => d.kind === 'videoinput');
+      setDevices(videoDevices);
+    } catch (e) {
+      console.warn('Could not enumerate media devices:', e);
+    }
+  }, []);
+
+  const start = useCallback(async (selectedDeviceId = null) => {
     try {
       setError(null);
       
@@ -22,14 +37,23 @@ export function useCamera(options = {}) {
         }
       }
 
+      // Base video constraints
+      const videoConstraints = selectedDeviceId 
+        ? { deviceId: { exact: selectedDeviceId } }
+        : { facingMode: { ideal: facingMode } };
+
+      videoConstraints.width = { ideal: width };
+      videoConstraints.height = { ideal: height };
+
       const constraints = {
-        video: {
-          facingMode: { ideal: facingMode },
-          width: { ideal: width },
-          height: { ideal: height }
-        },
+        video: videoConstraints,
         audio: false
       };
+
+      // Stop any existing tracks
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+      }
 
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
       
@@ -40,6 +64,9 @@ export function useCamera(options = {}) {
       
       streamRef.current = stream;
       setActive(true);
+      
+      // Update device list after getting permission
+      await refreshDevices();
     } catch (err) {
       if (err.name === 'NotAllowedError') {
         setError('Camera access denied. Please enable camera permissions in your browser settings.');
@@ -50,7 +77,7 @@ export function useCamera(options = {}) {
       }
       console.error('Camera error:', err);
     }
-  }, [facingMode, width, height]);
+  }, [facingMode, width, height, refreshDevices]);
 
   const stop = useCallback(() => {
     if (streamRef.current) {
@@ -66,6 +93,10 @@ export function useCamera(options = {}) {
   const captureFrame = useCallback(() => {
     if (!videoRef.current || !active) return null;
     const video = videoRef.current;
+    
+    // Ensure video has loaded properties
+    if (video.videoWidth === 0 || video.videoHeight === 0) return null;
+
     const canvas = document.createElement('canvas');
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
@@ -83,21 +114,34 @@ export function useCamera(options = {}) {
   }, [captureFrame]);
 
   useEffect(() => {
+    // Initial check for camera sources
+    refreshDevices();
+    
+    // Listen for device changes (plugs/unplugs)
+    if (navigator.mediaDevices && navigator.mediaDevices.addEventListener) {
+      navigator.mediaDevices.addEventListener('devicechange', refreshDevices);
+    }
+    
     return () => {
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop());
       }
+      if (navigator.mediaDevices && navigator.mediaDevices.removeEventListener) {
+        navigator.mediaDevices.removeEventListener('devicechange', refreshDevices);
+      }
     };
-  }, []);
+  }, [refreshDevices]);
 
   return {
     videoRef,
     active,
     error,
     permission,
+    devices,
     start,
     stop,
     captureFrame,
-    captureBlob
+    captureBlob,
+    refreshDevices
   };
 }
