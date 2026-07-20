@@ -72,8 +72,8 @@ class ONNXModel(DetectionModel):
     def _preprocess(self, image: np.ndarray) -> np.ndarray:
         import cv2
         
-        img = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        img = img.astype(np.float32) / 255.0
+        # image is already RGB numpy array from PIL
+        img = image.astype(np.float32) / 255.0
         
         h, w = img.shape[:2]
         size = settings.IMG_SIZE
@@ -101,7 +101,7 @@ class ONNXModel(DetectionModel):
         size = settings.IMG_SIZE
         
         scale = min(size / w_orig, size / h_orig)
-        new_w, new_w_actual = int(w_orig * scale), int(w_orig * scale)
+        new_w_actual = int(w_orig * scale)
         new_h = int(h_orig * scale)
         pad_x = (size - new_w_actual) // 2
         pad_y = (size - new_h) // 2
@@ -128,13 +128,6 @@ class ONNXModel(DetectionModel):
             y1 = max(0.0, min(y1, float(h_orig)))
             x2 = max(0.0, min(x2, float(w_orig)))
             y2 = max(0.0, min(y2, float(h_orig)))
-            
-            box_w = x2 - x1
-            box_h = y2 - y1
-            
-            # Focus filtering: Ignore tiny background artifacts (< 0.2% of image area)
-            if (box_w * box_h) < (w_orig * h_orig * 0.002) and confidence < 0.40:
-                continue
             
             detections.append(Detection(
                 class_id=int(class_id),
