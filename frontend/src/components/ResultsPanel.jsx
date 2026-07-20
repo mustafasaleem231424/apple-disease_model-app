@@ -28,14 +28,14 @@ function ResultsPanel({ detections, annotatedImage, t, onClear, processing, erro
     }
   };
 
+  const diseaseDetections = (detections || []).filter(
+    (d) => d.class_name !== 'healthy_apple' && d.class_name !== 'other'
+  );
+  const containsDiseases = diseaseDetections.length > 0;
+
   const diseaseCounts = {};
-  let containsDiseases = false;
-  
-  detections.forEach(d => {
+  diseaseDetections.forEach(d => {
     diseaseCounts[d.class_name] = (diseaseCounts[d.class_name] || 0) + 1;
-    if (d.class_name !== 'healthy_apple' && d.class_name !== 'other') {
-      containsDiseases = true;
-    }
   });
 
   return (
@@ -43,8 +43,8 @@ function ResultsPanel({ detections, annotatedImage, t, onClear, processing, erro
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
         <h2 style={{ margin: 0, padding: 0, border: 'none' }}>{t.results.title}</h2>
         {hasDetections && (
-          <span className="results-count-badge">
-            {detections.length} Total
+          <span className="results-count-badge font-outfit" style={{ background: containsDiseases ? 'rgba(239, 68, 68, 0.15)' : 'rgba(16, 185, 129, 0.15)', color: containsDiseases ? 'var(--red)' : 'var(--emerald)', border: `1px solid ${containsDiseases ? 'var(--red)' : 'var(--emerald)'}` }}>
+            {containsDiseases ? `${diseaseDetections.length} Pathogen Spot${diseaseDetections.length > 1 ? 's' : ''}` : 'No Pathogen Spots'}
           </span>
         )}
       </div>
@@ -74,16 +74,16 @@ function ResultsPanel({ detections, annotatedImage, t, onClear, processing, erro
             <div className="diagnostic-banner alert">
               <div className="diagnostic-banner-icon">⚠️</div>
               <div>
-                <h4 className="font-outfit">Active Pathogens Detected</h4>
-                <p>Treatment protocols or targeted spraying are recommended to prevent orchard contamination.</p>
+                <h4 className="font-outfit">Active Pathogens Detected ({diseaseDetections.length} Spot{diseaseDetections.length > 1 ? 's' : ''})</h4>
+                <p>Targeted disease lesions identified. Treatment protocols or selective spraying recommended.</p>
               </div>
             </div>
           ) : (
             <div className="diagnostic-banner success">
               <div className="diagnostic-banner-icon">🛡️</div>
               <div>
-                <h4 className="font-outfit">Foliage Appears Healthy</h4>
-                <p>No actionable disease signatures were detected on the leaf surfaces.</p>
+                <h4 className="font-outfit">Foliage Appears 100% Healthy</h4>
+                <p>No actionable pathogen or disease lesions were detected on the leaf surface.</p>
               </div>
             </div>
           )}
@@ -95,47 +95,51 @@ function ResultsPanel({ detections, annotatedImage, t, onClear, processing, erro
             </div>
           )}
           
-          <div className="summary-pills-container">
-            {Object.entries(diseaseCounts).map(([cls, count]) => {
-              const severity = getSeverityLevel(cls);
-              return (
-                <div key={cls} className="summary-pill" style={{ borderColor: severity.color, background: severity.bg }}>
-                  <span className="summary-pill-name">{getDiseaseLabel(cls)}</span>
-                  <span className="summary-pill-count" style={{ background: severity.color }}>{count}</span>
-                </div>
-              );
-            })}
-          </div>
+          {containsDiseases && (
+            <div className="summary-pills-container">
+              {Object.entries(diseaseCounts).map(([cls, count]) => {
+                const severity = getSeverityLevel(cls);
+                return (
+                  <div key={cls} className="summary-pill" style={{ borderColor: severity.color, background: severity.bg }}>
+                    <span className="summary-pill-name">{getDiseaseLabel(cls)}</span>
+                    <span className="summary-pill-count" style={{ background: severity.color }}>{count}</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
 
-          <div className="detection-list">
-            {detections.map((det, i) => {
-              const severity = getSeverityLevel(det.class_name);
-              return (
-                <div key={i} className={`detection-item ${getDiseaseClass(det.class_name)}`}>
-                  <div className="detection-info">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                      <span className="detection-name">{getDiseaseLabel(det.class_name)}</span>
-                      <span className="severity-badge" style={{ color: severity.color, background: severity.bg, borderColor: severity.color }}>
-                        {severity.label}
-                      </span>
+          {containsDiseases && (
+            <div className="detection-list">
+              {diseaseDetections.map((det, i) => {
+                const severity = getSeverityLevel(det.class_name);
+                return (
+                  <div key={i} className={`detection-item ${getDiseaseClass(det.class_name)}`}>
+                    <div className="detection-info">
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                        <span className="detection-name">{getDiseaseLabel(det.class_name)}</span>
+                        <span className="severity-badge" style={{ color: severity.color, background: severity.bg, borderColor: severity.color }}>
+                          {severity.label}
+                        </span>
+                      </div>
+                      {getDiseaseDesc(det.class_name) && (
+                        <div className="detection-desc">{getDiseaseDesc(det.class_name)}</div>
+                      )}
+                      <div className="confidence-bar">
+                        <div
+                          className="confidence-fill"
+                          style={{ width: `${det.confidence * 100}%`, background: severity.color }}
+                        />
+                      </div>
                     </div>
-                    {getDiseaseDesc(det.class_name) && (
-                      <div className="detection-desc">{getDiseaseDesc(det.class_name)}</div>
-                    )}
-                    <div className="confidence-bar">
-                      <div
-                        className="confidence-fill"
-                        style={{ width: `${det.confidence * 100}%`, background: severity.color }}
-                      />
+                    <div className="detection-confidence" style={{ color: severity.color }}>
+                      {formatConfidence(det.confidence)}
                     </div>
                   </div>
-                  <div className="detection-confidence" style={{ color: severity.color }}>
-                    {formatConfidence(det.confidence)}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </>
       )}
 

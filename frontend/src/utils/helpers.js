@@ -17,7 +17,12 @@ export const drawDetections = (canvas, detections, options = {}) => {
   
   ctx.save();
   
-  detections.forEach((det) => {
+  // Only label actual pathogen/disease spots, ignoring healthy foliage and background
+  const diseaseSpots = (detections || []).filter(
+    (det) => det.class_name !== 'healthy_apple' && det.class_name !== 'other'
+  );
+  
+  diseaseSpots.forEach((det) => {
     let xmin, ymin, xmax, ymax;
     if (Array.isArray(det.bbox)) {
       [xmin, ymin, xmax, ymax] = det.bbox;

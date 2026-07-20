@@ -59,7 +59,9 @@ def optimize_image_for_inference(image_np: np.ndarray, max_dim: int = 1920) -> n
 def draw_detections_on_image(image: np.ndarray, detections: List[Detection]) -> np.ndarray:
     import cv2
 
-    for det in detections:
+    disease_spots = [d for d in detections if d.class_name not in ("healthy_apple", "other")]
+
+    for det in disease_spots:
         x1, y1, x2, y2 = [int(v) for v in det.bbox]
         w = x2 - x1
         h = y2 - y1

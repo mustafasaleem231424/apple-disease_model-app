@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     MODEL_PATH: Optional[str] = os.getenv("MODEL_PATH", None)
     
     DEVICE: str = os.getenv("DEVICE", "cpu")
-    CONF_THRESHOLD: float = float(os.getenv("CONF_THRESHOLD", "0.20"))
+    CONF_THRESHOLD: float = float(os.getenv("CONF_THRESHOLD", "0.30"))
     IOU_THRESHOLD: float = float(os.getenv("IOU_THRESHOLD", "0.45"))
     IMG_SIZE: int = int(os.getenv("IMG_SIZE", "640"))
     MAX_IMAGE_SIZE: int = int(os.getenv("MAX_IMAGE_SIZE", "4096"))
