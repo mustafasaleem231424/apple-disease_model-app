@@ -16,7 +16,7 @@ function App() {
   const [lang, setLang] = useState('en');
   const [modelReady, setModelReady] = useState(false);
   const [modelInfo, setModelInfo] = useState(null);
-  const [confThreshold, setConfThreshold] = useState(0.25);
+  const [confThreshold, setConfThreshold] = useState(0.10);
   const [imageSize, setImageSize] = useState(null);
   const [inferenceTime, setInferenceTime] = useState(null);
   const [activeTab, setActiveTab] = useState('live'); // 'live' is default, highlighting real-time check
