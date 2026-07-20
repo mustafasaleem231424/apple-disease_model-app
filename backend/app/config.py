@@ -46,7 +46,7 @@ class Settings(BaseSettings):
     CORS_ALLOW_METHODS: List[str] = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
     CORS_ALLOW_HEADERS: List[str] = ["*"]
     
-    RATE_LIMIT_PER_MINUTE: int = int(os.getenv("RATE_LIMIT_PER_MINUTE", "60"))
+    RATE_LIMIT_PER_MINUTE: int = int(os.getenv("RATE_LIMIT_PER_MINUTE", "600"))
     RATE_LIMIT_BURST: int = int(os.getenv("RATE_LIMIT_BURST", "10"))
     
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
