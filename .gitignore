@@ -7,7 +7,6 @@ venv/
 node_modules/
 dist/
 build/
-*.onnx
 *.pt
 *.weights
 .DS_Store
